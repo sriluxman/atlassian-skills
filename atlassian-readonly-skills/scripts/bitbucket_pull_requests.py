@@ -7,6 +7,7 @@ in Bitbucket Server/Data Center.
 
 from typing import Optional, Dict, Any, List
 from ._common import (
+    AtlassianCredentials,
     get_bitbucket_client,
     format_json_response,
     format_error_response,
