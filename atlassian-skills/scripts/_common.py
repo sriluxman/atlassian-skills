@@ -125,7 +125,7 @@ class AtlassianCredentials:
     jira_api_token: Optional[str] = None
     jira_pat_token: Optional[str] = None
     jira_api_version: Optional[str] = None
-    jira_ssl_verify: bool = False
+    jira_ssl_verify: bool = True
     
     # Confluence configuration
     confluence_url: Optional[str] = None
@@ -133,7 +133,7 @@ class AtlassianCredentials:
     confluence_api_token: Optional[str] = None
     confluence_pat_token: Optional[str] = None
     confluence_api_version: Optional[str] = None
-    confluence_ssl_verify: bool = False
+    confluence_ssl_verify: bool = True
     
     # Bitbucket configuration
     bitbucket_url: Optional[str] = None
@@ -141,7 +141,7 @@ class AtlassianCredentials:
     bitbucket_api_token: Optional[str] = None
     bitbucket_pat_token: Optional[str] = None
     bitbucket_api_version: Optional[str] = None
-    bitbucket_ssl_verify: bool = False
+    bitbucket_ssl_verify: bool = True
     
     def is_jira_available(self) -> bool:
         """Check if Jira credentials are complete and valid.
@@ -239,7 +239,7 @@ class AtlassianConfig:
         api_token: Optional[str] = None,
         pat_token: Optional[str] = None,
         api_version: Optional[str] = None,
-        ssl_verify: bool = False
+        ssl_verify: bool = True
     ):
         """Initialize configuration.
 
@@ -249,7 +249,7 @@ class AtlassianConfig:
             api_token: API token for Cloud authentication (optional)
             pat_token: Personal Access Token for Data Center authentication (optional)
             api_version: API version to use ('2' or '3'). If not specified, will auto-detect (optional)
-            ssl_verify: Whether to verify SSL certificates (default: False)
+            ssl_verify: Whether to verify SSL certificates (default: True)
         """
         self.url = url.rstrip('/') if url else ""
         self.username = username
