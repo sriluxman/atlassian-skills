@@ -77,6 +77,20 @@ def sample_page_data():
 
 
 @pytest.fixture
+def sample_space_data():
+    """Sample Confluence space data."""
+    return {
+        'id': '12345',
+        'key': 'TEST',
+        'name': 'Test Space',
+        'type': 'global',
+        'description': {'plain': {'value': 'Test space description'}},
+        'status': 'current',
+        '_links': {'webui': '/wiki/spaces/TEST'}
+    }
+
+
+@pytest.fixture
 def sample_pr_data():
     """Sample Bitbucket pull request data."""
     return {
