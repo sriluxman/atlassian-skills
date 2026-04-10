@@ -198,12 +198,3 @@ def confluence_get_space_content(
         return format_error_response('UnexpectedError', f'Unexpected error: {str(e)}')
 
 
-if __name__ == '__main__':
-    # Fix encoding for Windows console
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
-    # Test the functions when run directly
-    print("Testing Confluence space functions...")
-    print("\n=== Getting all spaces ===")
-    print(confluence_get_spaces())
