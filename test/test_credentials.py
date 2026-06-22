@@ -75,7 +75,9 @@ class TestAtlassianCredentials:
             bitbucket_pat_token="token3"
         )
         services = creds.get_available_services()
-        assert set(services) == {"jira", "confluence", "bitbucket"}
+        # Requirements Yogi is a Confluence plugin, so it becomes available whenever
+        # Confluence credentials are present.
+        assert set(services) == {"jira", "confluence", "bitbucket", "requirement_yogi"}
     
     def test_get_available_services_partial(self):
         """Test getting available services with partial configuration."""
@@ -205,7 +207,7 @@ class TestCheckAvailableSkills:
             bitbucket_pat_token="token3"
         )
         result = check_available_skills(creds)
-        assert set(result["available_services"]) == {"jira", "confluence", "bitbucket"}
+        assert set(result["available_services"]) == {"jira", "confluence", "bitbucket", "requirement_yogi"}
         assert result["unavailable_services"] == {}
     
     def test_partial_services_available(self):
@@ -224,4 +226,5 @@ class TestCheckAvailableSkills:
         creds = AtlassianCredentials()
         result = check_available_skills(creds)
         assert result["available_services"] == []
-        assert len(result["unavailable_services"]) == 3
+        # 4 = jira, confluence, bitbucket, requirement_yogi (Confluence-derived)
+        assert len(result["unavailable_services"]) == 4

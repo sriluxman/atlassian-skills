@@ -142,6 +142,12 @@ class AtlassianCredentials:
     bitbucket_pat_token: Optional[str] = None
     bitbucket_api_version: Optional[str] = None
     bitbucket_ssl_verify: bool = True
+
+    # Requirements Yogi configuration
+    # Requirements Yogi is a Confluence plugin and reuses Confluence URL +
+    # authentication. The field below is an optional allow-list filter on
+    # which Confluence space keys are accessible.
+    requirement_yogi_spaces_filter: Optional[str] = None
     
     def is_jira_available(self) -> bool:
         """Check if Jira credentials are complete and valid.
@@ -167,6 +173,17 @@ class AtlassianCredentials:
         has_basic = bool(self.confluence_username and self.confluence_api_token)
         return has_pat or has_basic
     
+    def is_requirement_yogi_available(self) -> bool:
+        """Check if Requirements Yogi credentials are complete and valid.
+
+        Requirements Yogi is a Confluence plugin, so it requires the same
+        credentials as Confluence (URL + PAT or username/api_token).
+
+        Returns:
+            True if Requirements Yogi can be used, False otherwise
+        """
+        return self.is_confluence_available()
+
     def is_bitbucket_available(self) -> bool:
         """Check if Bitbucket credentials are complete and valid.
         
@@ -193,6 +210,8 @@ class AtlassianCredentials:
             services.append("confluence")
         if self.is_bitbucket_available():
             services.append("bitbucket")
+        if self.is_requirement_yogi_available():
+            services.append("requirement_yogi")
         return services
     
     def get_unavailable_services(self) -> Dict[str, str]:
@@ -221,7 +240,13 @@ class AtlassianCredentials:
                 unavailable["bitbucket"] = "Missing bitbucket_url"
             else:
                 unavailable["bitbucket"] = "Missing authentication credentials (provide bitbucket_pat_token or bitbucket_username + bitbucket_api_token)"
-        
+
+        if not self.is_requirement_yogi_available():
+            if not self.confluence_url:
+                unavailable["requirement_yogi"] = "Missing confluence_url (Requirements Yogi is a Confluence plugin)"
+            else:
+                unavailable["requirement_yogi"] = "Missing Confluence authentication credentials (provide confluence_pat_token or confluence_username + confluence_api_token)"
+
         return unavailable
 
 
@@ -341,6 +366,21 @@ class AtlassianConfig:
                 api_version=credentials.confluence_api_version,
                 ssl_verify=credentials.confluence_ssl_verify
             )
+        elif service == "requirement_yogi":
+            if not credentials.is_requirement_yogi_available():
+                raise ConfigurationError(
+                    "Requirements Yogi credentials not provided or incomplete. "
+                    "Requirements Yogi reuses Confluence credentials. Please provide "
+                    "confluence_url and either confluence_pat_token or (confluence_username + confluence_api_token)."
+                )
+            config = cls(
+                url=credentials.confluence_url or "",
+                username=credentials.confluence_username,
+                api_token=credentials.confluence_api_token,
+                pat_token=credentials.confluence_pat_token,
+                api_version=credentials.confluence_api_version,
+                ssl_verify=credentials.confluence_ssl_verify
+            )
         elif service == "bitbucket":
             if not credentials.is_bitbucket_available():
                 raise ConfigurationError(
@@ -356,7 +396,7 @@ class AtlassianConfig:
                 ssl_verify=credentials.bitbucket_ssl_verify
             )
         else:
-            raise ConfigurationError(f"Unknown service: {service}. Must be 'jira', 'confluence', or 'bitbucket'.")
+            raise ConfigurationError(f"Unknown service: {service}. Must be 'jira', 'confluence', 'bitbucket', or 'requirement_yogi'.")
         
         return config
     
@@ -585,6 +625,50 @@ def get_confluence_client(credentials: Optional[AtlassianCredentials] = None) ->
     else:
         config = AtlassianConfig.from_env('CONFLUENCE')
     return AtlassianClient(config)
+
+
+def get_requirement_yogi_client(credentials: Optional[AtlassianCredentials] = None) -> AtlassianClient:
+    """Get configured Requirements Yogi client.
+
+    Requirements Yogi is a Confluence plugin and uses Confluence URL +
+    authentication. This helper returns an AtlassianClient configured
+    against the Confluence base URL; callers pass full paths starting
+    with ``/rest/reqs/1/...``.
+
+    Args:
+        credentials: Optional AtlassianCredentials object. If not provided,
+                    configuration will be loaded from environment variables
+                    (CONFLUENCE_URL + CONFLUENCE_PAT_TOKEN or
+                    CONFLUENCE_USERNAME + CONFLUENCE_API_TOKEN).
+
+    Returns:
+        Configured AtlassianClient instance pointing at the Confluence host.
+
+    Raises:
+        ConfigurationError: If configuration is missing or invalid
+    """
+    if credentials:
+        config = AtlassianConfig.from_credentials(credentials, 'requirement_yogi')
+    else:
+        config = AtlassianConfig.from_env('CONFLUENCE')
+    return AtlassianClient(config)
+
+
+def get_requirement_yogi_spaces_filter(credentials: Optional[AtlassianCredentials] = None) -> Optional[str]:
+    """Get the Requirements Yogi allowed-spaces filter, if configured.
+
+    Args:
+        credentials: Optional AtlassianCredentials with
+                    ``requirement_yogi_spaces_filter`` set. If not provided
+                    or unset, falls back to the
+                    ``REQUIREMENT_YOGI_SPACES_FILTER`` environment variable.
+
+    Returns:
+        Comma-separated string of allowed space keys, or None if no filter.
+    """
+    if credentials and credentials.requirement_yogi_spaces_filter:
+        return credentials.requirement_yogi_spaces_filter
+    return os.getenv('REQUIREMENT_YOGI_SPACES_FILTER')
 
 
 def get_bitbucket_client(credentials: Optional[AtlassianCredentials] = None) -> AtlassianClient:

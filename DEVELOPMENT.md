@@ -83,11 +83,27 @@ This table categorizes all 45 functions across Jira, Confluence, and Bitbucket m
 
 **Bitbucket Summary**: 9 READ operations, 0 WRITE operations
 
+### Requirements Yogi Functions (6 total)
+
+Requirements Yogi is a Confluence plugin; tools call its REST API
+(`/rest/reqs/1/...`) using the configured Confluence credentials.
+
+| Module | Function | Type | Include in Readonly |
+|--------|----------|------|---------------------|
+| requirement_yogi | `requirement_yogi_get_requirement` | READ | ✅ |
+| requirement_yogi | `requirement_yogi_list_requirements` | READ | ✅ |
+| requirement_yogi | `requirement_yogi_create_requirement` | WRITE | ❌ |
+| requirement_yogi | `requirement_yogi_update_requirement` | WRITE | ❌ |
+| requirement_yogi | `requirement_yogi_delete_requirement` | WRITE | ❌ |
+| requirement_yogi | `requirement_yogi_bulk_update_requirements` | WRITE | ❌ |
+
+**Requirements Yogi Summary**: 2 READ operations, 4 WRITE operations
+
 ### Overall Summary
 
-- **Total Functions**: 45
-- **Read Operations**: 27 (60%)
-- **Write Operations**: 18 (40%)
+- **Total Functions**: 51
+- **Read Operations**: 29 (~57%)
+- **Write Operations**: 22 (~43%)
 
 
 ## Relationship Between Skill Variants
@@ -225,6 +241,7 @@ This table shows which files need to be synced and how:
 | `bitbucket_pull_requests.py` | Partial | 2 read functions only |
 | `bitbucket_files.py` | Full copy | All functions are READ |
 | `bitbucket_commits.py` | Full copy | All functions are READ |
+| `requirement_yogi.py` | Partial | Only `requirement_yogi_get_requirement` and `requirement_yogi_list_requirements` |
 | `SKILL.md` | Manual update | Read operations only |
 | `REFERENCE.md` | Manual update | Read operations only |
 

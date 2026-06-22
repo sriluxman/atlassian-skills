@@ -1,6 +1,6 @@
 ---
 name: atlassian-readonly-skills
-description: Read-only Python utilities for Jira, Confluence, and Bitbucket integration. Provides read access to issues, search, workflows, pages, pull requests, commit history, and more. Use when users need to query Atlassian products like "get a Jira issue", "search Confluence pages", "view pull request details", or "get commit history". This variant excludes all write operations for token efficiency and safety.
+description: Read-only Python utilities for Jira, Confluence, Bitbucket, and Requirements Yogi integration. Provides read access to issues, search, workflows, pages, pull requests, commit history, requirement lookup, and more. Use when users need to query Atlassian products like "get a Jira issue", "search Confluence pages", "view pull request details", "get commit history", or "get Requirements Yogi requirement IAM_001". This variant excludes all write operations for token efficiency and safety.
 license: Complete terms in LICENSE
 ---
 
@@ -417,6 +417,41 @@ bitbucket_get_commit(
     commit_id="1da11eaec25aed8b251de24841885c91493b3173"
 )
 ```
+
+### Requirements Yogi (`scripts.requirement_yogi`)
+
+Requirements Yogi is a Confluence plugin for requirement management. The API
+is mounted at `/rest/reqs/1/...` on the Confluence host and reuses Confluence
+authentication. This read-only variant exposes only lookup and search.
+
+Optional: restrict accessible spaces via `REQUIREMENT_YOGI_SPACES_FILTER`
+(comma-separated) or `requirement_yogi_spaces_filter` on `AtlassianCredentials`.
+
+```python
+from scripts.requirement_yogi import (
+    requirement_yogi_get_requirement,
+    requirement_yogi_list_requirements,
+)
+
+# Get a single requirement (e.g. THCU/IAM_001)
+requirement_yogi_get_requirement(
+    space_key="THCU",
+    requirement_key="IAM_001",
+)
+
+# List requirements in a space
+requirement_yogi_list_requirements(space_key="THCU", limit=25)
+
+# Search with Requirements Yogi query syntax
+requirement_yogi_list_requirements(
+    space_key="THCU",
+    query="key ~ 'IAM_%' AND @Priority = 'High'",
+    limit=50,
+)
+```
+
+See the [Requirements Yogi search syntax reference](https://docs.requirementyogi.com/data-center/search-syntax)
+for the full query language supported by `requirement_yogi_list_requirements`.
 
 ## Response Data Structures
 
