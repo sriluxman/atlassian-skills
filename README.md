@@ -1,6 +1,6 @@
-# Atlassian Skills for Claude Code - Jira, Confluence & Bitbucket Integration
+# Atlassian Skills for Claude Code - Jira, Confluence, Bitbucket & Requirements Yogi Integration
 
-A Claude Code skill for integrating with Jira, Confluence, and Bitbucket. Supports both Cloud and Data Center deployments.
+A Claude Code skill for integrating with Jira, Confluence, Bitbucket, and Requirements Yogi (a Confluence plugin). Supports both Cloud and Data Center deployments.
 
 **Note**: This project has been tested and verified on Atlassian Data Center. Cloud functionality has not been verified yet. If you encounter any issues with Cloud deployments, please report them.
 
@@ -41,6 +41,7 @@ Choose `atlassian-readonly-skills` unless you specifically need write capabiliti
 - **Jira**: Issue management, search (JQL), workflows, agile boards, sprints, worklogs
 - **Confluence**: Page management, search (CQL), comments, labels
 - **Bitbucket**: Projects, repositories, pull requests, code search, commit history
+- **Requirements Yogi**: Requirement CRUD, list/search (Requirements Yogi query syntax), bulk update — reuses Confluence credentials
 - **Dual Authentication**: Cloud (API Token) and Data Center (PAT Token)
 - **Unified Response Format**: All functions return flattened JSON structures
 
@@ -101,6 +102,20 @@ BITBUCKET_URL=https://bitbucket.your-company.com
 BITBUCKET_PAT_TOKEN=your_pat_token
 ```
 
+### Requirements Yogi
+
+Requirements Yogi is a Confluence plugin and reuses the **Confluence**
+configuration above (URL + PAT or username/API token). No extra credentials
+are required.
+
+Optionally restrict which Confluence spaces can be accessed via Requirements
+Yogi:
+
+```bash
+# Comma-separated list of allowed Confluence space keys
+REQUIREMENT_YOGI_SPACES_FILTER=PROJ,DEV
+```
+
 Get your API tokens:
 - **Cloud**: https://id.atlassian.com/manage-profile/security/api-tokens
 - **Data Center**: Profile → Personal Access Tokens
@@ -145,6 +160,20 @@ Once configured, simply ask Claude to perform Atlassian operations:
 "Search for code containing 'authenticate' in project PROJ"
 
 "Get the diff for PR #42"
+```
+
+### Requirements Yogi Examples
+
+```
+"Get requirement REQ_001 from the PROJ space"
+
+"List the first 25 requirements in space PROJ"
+
+"Search requirements in PROJ where key starts with 'REQ_' and priority is High"
+
+"Create requirement REQ_042 in PROJ with title 'Token rotation'"
+
+"Update requirement PROJ/REQ_001 setting Priority to Critical"
 ```
 
 ## Available Functions
@@ -235,6 +264,19 @@ Once configured, simply ask Claude to perform Atlassian operations:
 - `bitbucket_get_commits` - Get commit history
 - `bitbucket_get_commit` - Get details of a specific commit
 
+### Requirements Yogi
+
+Requirements Yogi is a Confluence plugin; these tools call its REST API
+(`/rest/reqs/1/...`) using the configured Confluence credentials.
+
+**requirement_yogi**
+- `requirement_yogi_get_requirement` - Get a single requirement by space + key
+- `requirement_yogi_list_requirements` - List or search requirements in a space (Requirements Yogi query syntax)
+- `requirement_yogi_create_requirement` - Create a new requirement
+- `requirement_yogi_update_requirement` - Update an existing requirement
+- `requirement_yogi_delete_requirement` - Delete a requirement
+- `requirement_yogi_bulk_update_requirements` - Bulk update multiple requirements in a space
+
 ## Error Handling
 
 All functions return JSON with consistent error format:
@@ -255,7 +297,7 @@ For worklogs: `1w` (week), `2d` (days), `3h` (hours), `30m` (minutes), or combin
 
 ## Testing
 
-This project includes comprehensive test coverage with **203 test cases** covering all 45 methods across Jira, Confluence, and Bitbucket.
+This project includes comprehensive test coverage with **272 test cases** covering all 51 methods across Jira, Confluence, Bitbucket, and Requirements Yogi.
 
 ### Run Tests
 
@@ -270,6 +312,7 @@ pytest test/ -v
 pytest test/test_jira_*.py -v
 pytest test/test_confluence_*.py -v
 pytest test/test_bitbucket_*.py -v
+pytest test/test_requirement_yogi.py -v
 
 # Generate coverage report
 pytest test/ --cov=atlassian-skills/scripts --cov-report=html

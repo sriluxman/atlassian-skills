@@ -589,10 +589,46 @@ AtlassianCredentials(
     bitbucket_api_token: Optional[str] = None,
     bitbucket_pat_token: Optional[str] = None,
     bitbucket_api_version: Optional[str] = None,
-    bitbucket_ssl_verify: bool = False
+    bitbucket_ssl_verify: bool = False,
+
+    # Requirements Yogi (reuses Confluence URL + auth above)
+    requirement_yogi_spaces_filter: Optional[str] = None  # e.g. "PROJ,DEV"
 )
 ```
 
 For each service, provide either:
 - **PAT Token** (for Data Center/Server): `{service}_pat_token`
 - **Username + API Token** (for Cloud): `{service}_username` + `{service}_api_token`
+
+Requirements Yogi has no dedicated credentials — it uses Confluence URL +
+authentication. The optional `requirement_yogi_spaces_filter` (or the
+`REQUIREMENT_YOGI_SPACES_FILTER` env var) restricts which Confluence space
+keys can be queried via the Requirements Yogi tools.
+
+## Requirements Yogi Examples (Read-Only)
+
+```python
+from scripts.requirement_yogi import (
+    requirement_yogi_get_requirement,
+    requirement_yogi_list_requirements,
+)
+
+# Get a single requirement (tested with PROJ/REQ_001)
+requirement_yogi_get_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_001",
+)
+
+# List requirements in a space
+requirement_yogi_list_requirements(space_key="PROJ", limit=25)
+
+# Search with Requirements Yogi query syntax
+requirement_yogi_list_requirements(
+    space_key="PROJ",
+    query="key ~ 'REQ_%' AND @Priority = 'High'",
+    limit=100,
+)
+```
+
+For the full Requirements Yogi search query language, see:
+https://docs.requirementyogi.com/data-center/search-syntax

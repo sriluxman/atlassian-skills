@@ -1,12 +1,12 @@
 ---
 name: atlassian-skills
-description: Python utilities for Jira, Confluence, and Bitbucket integration. Provides issue management, search, workflows, page management, pull requests, commit history, and more. Use when users need to interact with Atlassian products like "create a Jira issue", "search Confluence pages", "create a pull request", "get commit history", or "update sprint status".
+description: Python utilities for Jira, Confluence, Bitbucket, and Requirements Yogi integration. Provides issue management, search, workflows, page management, pull requests, commit history, requirement CRUD, and more. Use when users need to interact with Atlassian products like "create a Jira issue", "search Confluence pages", "create a pull request", "get commit history", "update sprint status", or "fetch a Requirements Yogi requirement".
 license: Complete terms in LICENSE
 ---
 
 # Atlassian Skills
 
-Python utilities for Jira, Confluence, and Bitbucket integration, supporting both Cloud and Data Center deployments.
+Python utilities for Jira, Confluence, Bitbucket, and Requirements Yogi integration, supporting both Cloud and Data Center deployments. Requirements Yogi is a Confluence plugin and reuses Confluence credentials.
 
 ## Configuration
 
@@ -553,6 +553,76 @@ jira_get_user_profile(
     credentials=credentials  # Optional
 )
 ```
+
+### Requirements Yogi (`scripts.requirement_yogi`)
+
+Requirements Yogi is a Confluence plugin for requirement management. The API is
+mounted at `/rest/reqs/1/...` on the Confluence host and is authenticated with
+the same Confluence credentials (PAT for Data Center, username + API token for
+Cloud). No extra environment variables are needed beyond `CONFLUENCE_URL` and
+the Confluence auth.
+
+Optional: restrict which Confluence spaces are accessible by setting
+`REQUIREMENT_YOGI_SPACES_FILTER` (comma-separated space keys) or the
+`requirement_yogi_spaces_filter` field on `AtlassianCredentials`.
+
+```python
+from scripts.requirement_yogi import (
+    requirement_yogi_get_requirement,
+    requirement_yogi_list_requirements,
+    requirement_yogi_create_requirement,
+    requirement_yogi_update_requirement,
+    requirement_yogi_delete_requirement,
+    requirement_yogi_bulk_update_requirements,
+)
+
+# Get a single requirement (e.g. PROJ/REQ_001)
+requirement_yogi_get_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_001",
+)
+
+# List requirements in a space
+requirement_yogi_list_requirements(space_key="PROJ", limit=25)
+
+# Search with Requirements Yogi query syntax
+requirement_yogi_list_requirements(
+    space_key="PROJ",
+    query="key ~ 'REQ_%' AND @Priority = 'High'",
+    limit=50,
+)
+
+# Create a new requirement
+requirement_yogi_create_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_042",
+    title="Token rotation",
+    content_html="<p>The system shall rotate tokens every 24h.</p>",
+    properties={"Category": "Security", "Priority": "High"},
+)
+
+# Update an existing requirement (only provided fields are changed)
+requirement_yogi_update_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_001",
+    properties={"Priority": "Critical"},
+)
+
+# Delete a requirement
+requirement_yogi_delete_requirement(space_key="PROJ", requirement_key="REQ_001")
+
+# Bulk update multiple requirements in one call
+requirement_yogi_bulk_update_requirements(
+    space_key="PROJ",
+    requirements=[
+        {"key": "REQ_001", "title": "Updated title"},
+        {"key": "REQ_002", "properties": {"Priority": "Low"}},
+    ],
+)
+```
+
+See the [Requirements Yogi search syntax reference](https://docs.requirementyogi.com/data-center/search-syntax)
+for the full query language supported by `requirement_yogi_list_requirements`.
 
 ## Function Signature Pattern
 

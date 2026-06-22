@@ -615,10 +615,139 @@ AtlassianCredentials(
     bitbucket_api_token: Optional[str] = None,
     bitbucket_pat_token: Optional[str] = None,
     bitbucket_api_version: Optional[str] = None,
-    bitbucket_ssl_verify: bool = False
+    bitbucket_ssl_verify: bool = False,
+
+    # Requirements Yogi (reuses Confluence URL + auth above)
+    requirement_yogi_spaces_filter: Optional[str] = None  # e.g. "PROJ,DEV"
 )
 ```
 
 For each service, provide either:
 - **PAT Token** (for Data Center/Server): `{service}_pat_token`
 - **Username + API Token** (for Cloud): `{service}_username` + `{service}_api_token`
+
+Requirements Yogi has no dedicated credentials — it uses Confluence URL +
+authentication. The optional `requirement_yogi_spaces_filter` (or the
+`REQUIREMENT_YOGI_SPACES_FILTER` env var) restricts which Confluence space
+keys can be queried via the Requirements Yogi tools.
+
+## Requirements Yogi Examples
+
+Requirements Yogi is a Confluence plugin. The tools call its REST API at
+`/rest/reqs/1/...` on the Confluence host using the configured Confluence
+credentials.
+
+### Get a Single Requirement
+
+```python
+from scripts.requirement_yogi import requirement_yogi_get_requirement
+
+# Tested with PROJ/REQ_001
+result = requirement_yogi_get_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_001",
+)
+```
+
+Example response (flattened):
+
+```json
+{
+  "key": "REQ_001",
+  "space_key": "PROJ",
+  "status": "ACTIVE",
+  "content": "The system shall authenticate users.",
+  "content_html": "<p>The system <strong>shall</strong> authenticate users.</p>",
+  "properties": {"Category": "Functional", "Priority": "High"},
+  "references": [{"key": "REQ_002", "space_key": "PROJ", "direction": "TO"}],
+  "jira_links": [{"issue_key": "PROJ-123", "summary": "...", "status": "In Progress"}],
+  "page_id": 467382,
+  "page_title": "Identity & Access Management",
+  "url": "https://confluence.example.com/x/abc"
+}
+```
+
+### List / Search Requirements
+
+```python
+from scripts.requirement_yogi import requirement_yogi_list_requirements
+
+# Plain listing (default limit 50, max 200)
+requirement_yogi_list_requirements(space_key="PROJ", limit=25)
+
+# Requirements Yogi search syntax
+requirement_yogi_list_requirements(
+    space_key="PROJ",
+    query="key ~ 'REQ_%' AND @Priority = 'High'",
+    limit=100,
+)
+
+# Filter by linked Jira issue
+requirement_yogi_list_requirements(
+    space_key="PROJ",
+    query="jira = 'PROJ-123'",
+)
+```
+
+Response shape:
+
+```json
+{
+  "results": [{"key": "REQ_001", "...": "..."}],
+  "count": 1,
+  "limit": 50,
+  "offset": 0,
+  "explanation": "Requirements in space 'PROJ'"
+}
+```
+
+### Create / Update / Delete
+
+```python
+from scripts.requirement_yogi import (
+    requirement_yogi_create_requirement,
+    requirement_yogi_update_requirement,
+    requirement_yogi_delete_requirement,
+)
+
+requirement_yogi_create_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_042",
+    title="Token rotation",
+    content_html="<p>The system shall rotate tokens every 24h.</p>",
+    properties={"Category": "Security", "Priority": "High"},
+)
+
+# Partial update — only provided fields are sent
+requirement_yogi_update_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_001",
+    properties={"Priority": "Critical"},
+)
+
+requirement_yogi_delete_requirement(
+    space_key="PROJ",
+    requirement_key="REQ_042",
+)
+```
+
+### Bulk Update
+
+```python
+from scripts.requirement_yogi import requirement_yogi_bulk_update_requirements
+
+requirement_yogi_bulk_update_requirements(
+    space_key="PROJ",
+    requirements=[
+        {"key": "REQ_001", "title": "Updated title"},
+        {
+            "key": "REQ_002",
+            "content_html": "<p>Updated body</p>",
+            "properties": {"Priority": "Low"},
+        },
+    ],
+)
+```
+
+For the full Requirements Yogi search query language, see:
+https://docs.requirementyogi.com/data-center/search-syntax
