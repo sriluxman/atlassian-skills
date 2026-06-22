@@ -113,7 +113,7 @@ Yogi:
 
 ```bash
 # Comma-separated list of allowed Confluence space keys
-REQUIREMENT_YOGI_SPACES_FILTER=THCU,DEV
+REQUIREMENT_YOGI_SPACES_FILTER=PROJ,DEV
 ```
 
 Get your API tokens:
@@ -165,15 +165,15 @@ Once configured, simply ask Claude to perform Atlassian operations:
 ### Requirements Yogi Examples
 
 ```
-"Get requirement IAM_001 from the THCU space"
+"Get requirement REQ_001 from the PROJ space"
 
-"List the first 25 requirements in space THCU"
+"List the first 25 requirements in space PROJ"
 
-"Search requirements in THCU where key starts with 'IAM_' and priority is High"
+"Search requirements in PROJ where key starts with 'REQ_' and priority is High"
 
-"Create requirement IAM_042 in THCU with title 'Token rotation'"
+"Create requirement REQ_042 in PROJ with title 'Token rotation'"
 
-"Update requirement THCU/IAM_001 setting Priority to Critical"
+"Update requirement PROJ/REQ_001 setting Priority to Critical"
 ```
 
 ## Available Functions

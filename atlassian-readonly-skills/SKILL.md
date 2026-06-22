@@ -1,6 +1,6 @@
 ---
 name: atlassian-readonly-skills
-description: Read-only Python utilities for Jira, Confluence, Bitbucket, and Requirements Yogi integration. Provides read access to issues, search, workflows, pages, pull requests, commit history, requirement lookup, and more. Use when users need to query Atlassian products like "get a Jira issue", "search Confluence pages", "view pull request details", "get commit history", or "get Requirements Yogi requirement IAM_001". This variant excludes all write operations for token efficiency and safety.
+description: Read-only Python utilities for Jira, Confluence, Bitbucket, and Requirements Yogi integration. Provides read access to issues, search, workflows, pages, pull requests, commit history, requirement lookup, and more. Use when users need to query Atlassian products like "get a Jira issue", "search Confluence pages", "view pull request details", "get commit history", or "get Requirements Yogi requirement REQ_001". This variant excludes all write operations for token efficiency and safety.
 license: Complete terms in LICENSE
 ---
 
@@ -433,19 +433,19 @@ from scripts.requirement_yogi import (
     requirement_yogi_list_requirements,
 )
 
-# Get a single requirement (e.g. THCU/IAM_001)
+# Get a single requirement (e.g. PROJ/REQ_001)
 requirement_yogi_get_requirement(
-    space_key="THCU",
-    requirement_key="IAM_001",
+    space_key="PROJ",
+    requirement_key="REQ_001",
 )
 
 # List requirements in a space
-requirement_yogi_list_requirements(space_key="THCU", limit=25)
+requirement_yogi_list_requirements(space_key="PROJ", limit=25)
 
 # Search with Requirements Yogi query syntax
 requirement_yogi_list_requirements(
-    space_key="THCU",
-    query="key ~ 'IAM_%' AND @Priority = 'High'",
+    space_key="PROJ",
+    query="key ~ 'REQ_%' AND @Priority = 'High'",
     limit=50,
 )
 ```

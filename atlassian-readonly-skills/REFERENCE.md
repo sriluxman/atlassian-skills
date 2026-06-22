@@ -592,7 +592,7 @@ AtlassianCredentials(
     bitbucket_ssl_verify: bool = False,
 
     # Requirements Yogi (reuses Confluence URL + auth above)
-    requirement_yogi_spaces_filter: Optional[str] = None  # e.g. "THCU,DEV"
+    requirement_yogi_spaces_filter: Optional[str] = None  # e.g. "PROJ,DEV"
 )
 ```
 
@@ -613,19 +613,19 @@ from scripts.requirement_yogi import (
     requirement_yogi_list_requirements,
 )
 
-# Get a single requirement (tested with THCU/IAM_001)
+# Get a single requirement (tested with PROJ/REQ_001)
 requirement_yogi_get_requirement(
-    space_key="THCU",
-    requirement_key="IAM_001",
+    space_key="PROJ",
+    requirement_key="REQ_001",
 )
 
 # List requirements in a space
-requirement_yogi_list_requirements(space_key="THCU", limit=25)
+requirement_yogi_list_requirements(space_key="PROJ", limit=25)
 
 # Search with Requirements Yogi query syntax
 requirement_yogi_list_requirements(
-    space_key="THCU",
-    query="key ~ 'IAM_%' AND @Priority = 'High'",
+    space_key="PROJ",
+    query="key ~ 'REQ_%' AND @Priority = 'High'",
     limit=100,
 )
 ```

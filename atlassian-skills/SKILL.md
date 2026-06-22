@@ -576,26 +576,26 @@ from scripts.requirement_yogi import (
     requirement_yogi_bulk_update_requirements,
 )
 
-# Get a single requirement (e.g. THCU/IAM_001)
+# Get a single requirement (e.g. PROJ/REQ_001)
 requirement_yogi_get_requirement(
-    space_key="THCU",
-    requirement_key="IAM_001",
+    space_key="PROJ",
+    requirement_key="REQ_001",
 )
 
 # List requirements in a space
-requirement_yogi_list_requirements(space_key="THCU", limit=25)
+requirement_yogi_list_requirements(space_key="PROJ", limit=25)
 
 # Search with Requirements Yogi query syntax
 requirement_yogi_list_requirements(
-    space_key="THCU",
-    query="key ~ 'IAM_%' AND @Priority = 'High'",
+    space_key="PROJ",
+    query="key ~ 'REQ_%' AND @Priority = 'High'",
     limit=50,
 )
 
 # Create a new requirement
 requirement_yogi_create_requirement(
-    space_key="THCU",
-    requirement_key="IAM_042",
+    space_key="PROJ",
+    requirement_key="REQ_042",
     title="Token rotation",
     content_html="<p>The system shall rotate tokens every 24h.</p>",
     properties={"Category": "Security", "Priority": "High"},
@@ -603,20 +603,20 @@ requirement_yogi_create_requirement(
 
 # Update an existing requirement (only provided fields are changed)
 requirement_yogi_update_requirement(
-    space_key="THCU",
-    requirement_key="IAM_001",
+    space_key="PROJ",
+    requirement_key="REQ_001",
     properties={"Priority": "Critical"},
 )
 
 # Delete a requirement
-requirement_yogi_delete_requirement(space_key="THCU", requirement_key="IAM_001")
+requirement_yogi_delete_requirement(space_key="PROJ", requirement_key="REQ_001")
 
 # Bulk update multiple requirements in one call
 requirement_yogi_bulk_update_requirements(
-    space_key="THCU",
+    space_key="PROJ",
     requirements=[
-        {"key": "IAM_001", "title": "Updated title"},
-        {"key": "IAM_002", "properties": {"Priority": "Low"}},
+        {"key": "REQ_001", "title": "Updated title"},
+        {"key": "REQ_002", "properties": {"Priority": "Low"}},
     ],
 )
 ```
