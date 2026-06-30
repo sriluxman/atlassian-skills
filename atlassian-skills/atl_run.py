@@ -43,7 +43,7 @@ def _load_env() -> None:
 
 
 def _build_registry() -> dict:
-    """Map every public function in scripts/*.py to its callable."""
+    """Map every public function in scripts/*.py to (callable, module_name)."""
     here = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, here)
     import scripts  # noqa: F401  (package marker)
@@ -61,8 +61,23 @@ def _build_registry() -> dict:
             if name.startswith("_"):
                 continue
             # first definition wins; functions are uniquely named across modules
-            registry.setdefault(name, fn)
+            registry.setdefault(name, (fn, mod.name))
     return registry
+
+
+def _print_list(registry: dict) -> None:
+    """Print all callable functions grouped by source module, bare names only.
+    These bare names are exactly what you pass as the first arg to this runner.
+    """
+    by_mod = {}
+    for name, (_fn, mod) in registry.items():
+        by_mod.setdefault(mod, []).append(name)
+    print("Available functions (call as: atl_run.py <name> key=value ...):\n")
+    for mod in sorted(by_mod):
+        print(f"# {mod}")
+        for name in sorted(by_mod[mod]):
+            print(f"  {name}")
+        print()
 
 
 def _coerce(value: str):
@@ -89,21 +104,28 @@ def main() -> int:
         print(__doc__)
         return 0
 
+    # Discovery mode: print every callable function, grouped by module.
+    if sys.argv[1] in ("--list", "-l", "list"):
+        _print_list(_build_registry())
+        return 0
+
     fn_name = sys.argv[1]
     kwargs = _parse_kwargs(sys.argv[2:])
 
     _load_env()
     registry = _build_registry()
 
-    fn = registry.get(fn_name)
-    if fn is None:
+    entry = registry.get(fn_name)
+    if entry is None:
         avail = ", ".join(sorted(registry))
         print(json.dumps({
             "success": False,
             "error": f"unknown function {fn_name!r}",
+            "hint": "run 'atl_run.py --list' to see all available functions",
             "available": avail,
         }, indent=2))
         return 1
+    fn = entry[0]
 
     result = fn(**kwargs)
     # Toolkit functions usually return JSON strings already; print as-is.
